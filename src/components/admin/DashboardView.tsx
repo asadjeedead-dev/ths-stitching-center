@@ -1,5 +1,5 @@
 import React from 'react';
-import { Student, StitchingOrder, AttendanceRecord, PublicApplication, ActivityEvent } from '../../types';
+import { Student, StitchingOrder, AttendanceRecord, PublicApplication, ActivityEvent, ContactInquiry } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { 
   Users, 
@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   UserPlus,
   Clock,
-  Package
+  Package,
+  MessageSquare
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -20,6 +21,7 @@ interface DashboardViewProps {
   orders: StitchingOrder[];
   attendance: AttendanceRecord[];
   applications: PublicApplication[];
+  inquiries: ContactInquiry[];
   activities: ActivityEvent[];
   onNavigateTab: (tab: string) => void;
   onOpenAddStudent: () => void;
@@ -41,6 +43,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   orders,
   attendance,
   applications,
+  inquiries,
   activities,
   onNavigateTab,
   onOpenAddStudent,
@@ -55,6 +58,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const deliveredOrders = orders.filter((o) => o.status === 'Delivered');
   const lateOrders = orders.filter((o) => o.status === 'Late' || o.isLate);
   const pendingApps = applications.filter((a) => a.status === 'New' || a.status === 'Pending' || a.status === 'Reviewed');
+  const newInquiries = inquiries.filter((item) => item.status === 'New');
 
   let totalClassDays = 0;
   let totalPresentCount = 0;
@@ -145,7 +149,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {(lateOrders.length > 0 || pendingApps.length > 0 || upcomingDeliveries.length > 0 || overdueOrders.length > 0) && (
+      {(lateOrders.length > 0 || pendingApps.length > 0 || newInquiries.length > 0 || upcomingDeliveries.length > 0 || overdueOrders.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {overdueOrders.length > 0 && (
             <div className="bg-rose-50/90 rounded-3xl p-6 border border-rose-200 flex flex-col justify-between space-y-4">
@@ -221,6 +225,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </button>
             </div>
           )}
+
+          {newInquiries.length > 0 && (
+            <div className="bg-sky-50/90 rounded-3xl p-6 border border-sky-200 flex flex-col justify-between space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-2xl bg-sky-100 text-sky-700 shrink-0">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-sky-900">
+                    {newInquiries.length} New Contact Message{newInquiries.length === 1 ? '' : 's'}
+                  </h3>
+                  <p className="text-xs text-sky-800 mt-1 leading-relaxed">
+                    Latest: {newInquiries[0].name} ({newInquiries[0].phone})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigateTab('inquiries')}
+                className="inline-flex items-center gap-1 text-xs font-bold text-sky-900 hover:text-sky-950 underline self-end"
+              >
+                <span>Read Messages</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -281,6 +310,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {event.type === 'delivery' && <CheckCircle2 className="w-4 h-4" />}
                     {event.type === 'attendance' && <CalendarCheck className="w-4 h-4" />}
                     {event.type === 'application' && <UserPlus className="w-4 h-4" />}
+                    {event.type === 'inquiry' && <MessageSquare className="w-4 h-4" />}
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-slate-800">{event.message}</p>

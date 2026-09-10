@@ -133,9 +133,21 @@ export interface PublicApplication {
 
 export type ApplicationStatus = 'New' | 'Reviewed' | 'Accepted' | 'Rejected' | 'Pending' | 'Approved';
 
+export type InquiryStatus = 'New' | 'Contacted' | 'Closed';
+
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  phone: string;
+  area: string;
+  message: string;
+  submittedAt: string;
+  status: InquiryStatus;
+}
+
 export interface ActivityEvent {
   id: string;
-  type: 'student' | 'order' | 'attendance' | 'application' | 'delivery';
+  type: 'student' | 'order' | 'attendance' | 'application' | 'delivery' | 'inquiry';
   message: string;
   timestamp: string;
 }

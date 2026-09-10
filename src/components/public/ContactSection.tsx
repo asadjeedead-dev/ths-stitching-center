@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
 import { ASSETS } from '../../data/initialData';
+import { submitInquiry } from '../../services/storage';
+import { FIRESTORE_RULES_CONSOLE_URL, FIRESTORE_DATA_CONSOLE_URL, firebaseErrorMessage } from '../../services/firebase';
 
 export const ContactSection: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -11,10 +15,27 @@ export const ContactSection: React.FC = () => {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.phone.trim()) return;
-    setSubmitted(true);
+
+    setLoading(true);
+    setFormError('');
+    try {
+      await submitInquiry({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        area: formData.area.trim(),
+        message: formData.message.trim(),
+      });
+      setSubmitted(true);
+    } catch (error) {
+      setFormError(
+        firebaseErrorMessage(error, 'Could not save your message. Please try again.')
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,6 +140,7 @@ export const ContactSection: React.FC = () => {
                 <button
                   onClick={() => {
                     setSubmitted(false);
+                    setFormError('');
                     setFormData({ name: '', phone: '', area: '', message: '' });
                   }}
                   className="px-6 py-2.5 text-xs font-bold text-white bg-[#166534] rounded-xl"
@@ -134,6 +156,32 @@ export const ContactSection: React.FC = () => {
                 <p className="text-xs text-slate-500">
                   Fill out the form below and we will get back to you within 24 hours.
                 </p>
+
+                {formError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 space-y-1">
+                    <div>{formError}</div>
+                    {/Firestore rules/i.test(formError) && (
+                      <div className="space-x-3">
+                        <a
+                          href={FIRESTORE_RULES_CONSOLE_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block underline underline-offset-2"
+                        >
+                          Open Firestore Rules and Publish
+                        </a>
+                        <a
+                          href={FIRESTORE_DATA_CONSOLE_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block underline underline-offset-2"
+                        >
+                          Open Firestore Data
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
@@ -193,10 +241,11 @@ export const ContactSection: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 text-center text-xs font-bold text-white bg-[#166534] hover:bg-[#14532d] rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full py-3.5 text-center text-xs font-bold text-white bg-[#166534] hover:bg-[#14532d] rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Submit Inquiry</span>
+                  <span>{loading ? 'Sending...' : 'Submit Inquiry'}</span>
                 </button>
               </form>
             )}

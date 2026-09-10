@@ -7,6 +7,7 @@ import {
   CalendarCheck, 
   Scissors, 
   FileText, 
+  MessageSquare,
   BarChart3, 
   Settings, 
   Globe, 
@@ -22,6 +23,7 @@ interface AdminSidebarProps {
   adminUser: AdminUser;
   lateOrdersCount: number;
   pendingAppsCount: number;
+  pendingInquiriesCount: number;
   mobileOpen: boolean;
   onCloseMobile: () => void;
   onAddStudent: () => void;
@@ -36,6 +38,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   adminUser,
   lateOrdersCount,
   pendingAppsCount,
+  pendingInquiriesCount,
   mobileOpen,
   onCloseMobile,
   onAddStudent,
@@ -58,6 +61,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: FileText, 
       badge: pendingAppsCount > 0 ? `${pendingAppsCount} New` : undefined,
       badgeColor: 'bg-emerald-600 text-white font-semibold'
+    },
+    {
+      id: 'inquiries',
+      label: 'Contact Messages',
+      icon: MessageSquare,
+      badge: pendingInquiriesCount > 0 ? `${pendingInquiriesCount} New` : undefined,
+      badgeColor: 'bg-sky-600 text-white font-semibold'
     },
     { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Settings & Data', icon: Settings },

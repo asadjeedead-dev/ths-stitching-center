@@ -7,6 +7,8 @@ import {
   PublicApplication,
   ApplicationStatus,
   ActivityEvent,
+  ContactInquiry,
+  InquiryStatus,
 } from '../../types';
 import { 
   saveStudent, 
@@ -22,7 +24,10 @@ import {
   subscribeOrders,
   subscribeAttendance,
   subscribeApplications,
+  subscribeInquiries,
   subscribeActivities,
+  updateInquiryStatus,
+  deleteInquiry,
 } from '../../services/storage';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminNavbar } from './AdminNavbar';
@@ -31,6 +36,7 @@ import { StudentsView } from './StudentsView';
 import { AttendanceView } from './AttendanceView';
 import { OrdersView } from './OrdersView';
 import { ApplicationsView } from './ApplicationsView';
+import { InquiriesView } from './InquiriesView';
 import { ReportsView } from './ReportsView';
 import { SettingsView } from './SettingsView';
 import { Toast, ToastMessage } from '../common/Toast';
@@ -60,6 +66,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [orders, setOrders] = useState<StitchingOrder[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [applications, setApplications] = useState<PublicApplication[]>([]);
+  const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
 
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
@@ -96,6 +103,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       }, handleError),
       subscribeAttendance(setAttendance, handleError),
       subscribeApplications(setApplications, handleError),
+      subscribeInquiries(setInquiries, handleError),
       subscribeActivities(setActivities, handleError),
     ];
 
@@ -206,8 +214,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     }
   };
 
+  const handleUpdateInquiryStatus = async (id: string, status: InquiryStatus) => {
+    try {
+      await updateInquiryStatus(id, status);
+      addToast(`Message marked as ${status}.`);
+    } catch (error) {
+      addToast(errorMessage(error), 'error');
+    }
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    try {
+      await deleteInquiry(id);
+      addToast('Contact message removed from Firebase.', 'info');
+    } catch (error) {
+      addToast(errorMessage(error), 'error');
+    }
+  };
+
   const lateOrders = orders.filter((o) => o.status === 'Late' || o.isLate);
   const pendingApps = applications.filter((a) => a.status === 'New' || a.status === 'Pending' || a.status === 'Reviewed');
+  const pendingInquiries = inquiries.filter((item) => item.status === 'New');
 
   return (
     <div className="min-h-screen bg-[#f8f9ff] flex text-slate-800">
@@ -221,6 +248,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         adminUser={adminUser}
         lateOrdersCount={lateOrders.length}
         pendingAppsCount={pendingApps.length}
+        pendingInquiriesCount={pendingInquiries.length}
         mobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
         onAddStudent={() => {
@@ -240,6 +268,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
           lateOrders={lateOrders}
           pendingApplications={pendingApps}
+          pendingInquiries={pendingInquiries}
           onNavigateTab={setActiveTab}
           onBackToPublic={onBackToPublic}
         />
@@ -268,6 +297,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               orders={orders}
               attendance={attendance}
               applications={applications}
+              inquiries={inquiries}
               activities={activities}
               onNavigateTab={setActiveTab}
               onOpenAddStudent={() => {
@@ -322,6 +352,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             />
           )}
 
+          {activeTab === 'inquiries' && (
+            <InquiriesView
+              inquiries={inquiries}
+              onUpdateStatus={handleUpdateInquiryStatus}
+              onDeleteInquiry={handleDeleteInquiry}
+            />
+          )}
+
           {activeTab === 'reports' && (
             <ReportsView
               students={students}
@@ -337,6 +375,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               ordersCount={orders.length}
               attendanceCount={attendance.length}
               applicationsCount={applications.length}
+              inquiriesCount={inquiries.length}
               onDataReset={() => undefined}
               onSuccessToast={addToast}
             />

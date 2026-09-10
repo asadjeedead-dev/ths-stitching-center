@@ -36,6 +36,7 @@ export const COLLECTIONS = {
   ORDERS: 'orders',
   ATTENDANCE: 'attendance',
   APPLICATIONS: 'applications',
+  INQUIRIES: 'inquiries',
   ACTIVITY: 'activity',
   ADMINS: 'admins',
 } as const;

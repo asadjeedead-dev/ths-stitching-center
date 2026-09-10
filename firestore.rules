@@ -15,6 +15,11 @@ service cloud.firestore {
       allow read, update, delete: if isSignedIn();
     }
 
+    match /inquiries/{id} {
+      allow create: if true;
+      allow read, update, delete: if isSignedIn();
+    }
+
     match /students/{id} {
       allow read, write: if isSignedIn();
     }

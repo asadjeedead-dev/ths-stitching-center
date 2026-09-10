@@ -19,6 +19,7 @@ interface SettingsViewProps {
   ordersCount: number;
   attendanceCount: number;
   applicationsCount: number;
+  inquiriesCount: number;
   onDataReset: () => void;
   onSuccessToast: (msg: string) => void;
 }
@@ -29,6 +30,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   ordersCount,
   attendanceCount,
   applicationsCount,
+  inquiriesCount,
   onDataReset,
   onSuccessToast,
 }) => {
@@ -130,7 +132,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         {/* Counts summary */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
           <div className="p-3.5 rounded-2xl bg-slate-50 text-center">
             <div className="text-slate-500 font-semibold">Trainee Records</div>
             <div className="text-lg font-bold text-slate-900">{studentsCount}</div>
@@ -144,15 +146,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <div className="text-lg font-bold text-slate-900">{attendanceCount}</div>
           </div>
           <div className="p-3.5 rounded-2xl bg-slate-50 text-center">
-            <div className="text-slate-500 font-semibold">Public Inquiries</div>
+            <div className="text-slate-500 font-semibold">Applications</div>
             <div className="text-lg font-bold text-slate-900">{applicationsCount}</div>
+          </div>
+          <div className="p-3.5 rounded-2xl bg-slate-50 text-center">
+            <div className="text-slate-500 font-semibold">Contact Messages</div>
+            <div className="text-lg font-bold text-slate-900">{inquiriesCount}</div>
           </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="text-xs text-rose-900">
             <span className="font-bold block text-rose-950">Clear live Firebase records:</span>
-            Permanently deletes students, orders, attendance, applications, and activity stored in Firestore. This does not restore dummy data.
+            Permanently deletes students, orders, attendance, applications, contact messages, and activity stored in Firestore. This does not restore dummy data.
           </div>
           <button
             onClick={() => setIsResetModalOpen(true)}
@@ -168,7 +174,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       <ConfirmModal
         isOpen={isResetModalOpen}
         title="Clear Firebase Data"
-        message="This permanently deletes live Firestore records for students, orders, attendance, applications, and activity. Dummy seed data will not be restored."
+        message="This permanently deletes live Firestore records for students, orders, attendance, applications, contact messages, and activity. Dummy seed data will not be restored."
         confirmLabel="Clear Everything"
         isDestructive
         onConfirm={handleConfirmReset}

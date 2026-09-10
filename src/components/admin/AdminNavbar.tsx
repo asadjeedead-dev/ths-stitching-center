@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AdminUser, StitchingOrder, PublicApplication } from '../../types';
+import { AdminUser, StitchingOrder, PublicApplication, ContactInquiry } from '../../types';
 import { 
   Menu, 
   Bell, 
@@ -9,7 +9,8 @@ import {
   UserPlus, 
   Scissors, 
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -18,6 +19,7 @@ interface AdminNavbarProps {
   onOpenMobileSidebar: () => void;
   lateOrders: StitchingOrder[];
   pendingApplications: PublicApplication[];
+  pendingInquiries: ContactInquiry[];
   onNavigateTab: (tab: string) => void;
   onBackToPublic: () => void;
 }
@@ -28,6 +30,7 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
   onOpenMobileSidebar,
   lateOrders,
   pendingApplications,
+  pendingInquiries,
   onNavigateTab,
   onBackToPublic,
 }) => {
@@ -39,12 +42,13 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
     attendance: { title: 'Daily Attendance Register', subtitle: 'Morning & Evening session roll call and percentage tracking' },
     orders: { title: 'Stitching Orders & Delivery Tracking', subtitle: 'Order queue, late delivery calculations, and reason logs' },
     applications: { title: 'Public Admissions & Inquiries', subtitle: 'Review and approve public student registration requests' },
+    inquiries: { title: 'Website Contact Messages', subtitle: 'Read visitor messages and call or WhatsApp them back' },
     reports: { title: 'Reports & Analytics', subtitle: 'Performance charts, on-time delivery rates, and student growth' },
     settings: { title: 'Center Settings & Data Tools', subtitle: 'Session preferences, admin profile, and data reset' },
   };
 
   const currentTabInfo = tabTitles[activeTab] || { title: 'Management System', subtitle: 'THS Stitching Center' };
-  const totalAlerts = lateOrders.length + pendingApplications.length;
+  const totalAlerts = lateOrders.length + pendingApplications.length + pendingInquiries.length;
 
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
@@ -171,6 +175,31 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-slate-700 truncate">{app.fullName} ({app.phone})</p>
+                    </div>
+                  </div>
+                ))}
+
+                {pendingInquiries.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      setShowNotifications(false);
+                      onNavigateTab('inquiries');
+                    }}
+                    className="flex items-start gap-3 p-2.5 rounded-xl bg-sky-50/80 hover:bg-sky-100 border border-sky-200/80 cursor-pointer transition"
+                  >
+                    <MessageSquare className="w-4 h-4 text-sky-700 shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-sky-800">New Message</span>
+                        <span className="text-[10px] text-sky-800 bg-sky-200/70 px-1.5 py-0.5 rounded">
+                          Contact
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-700 truncate">{item.name} ({item.phone})</p>
+                      {item.message && (
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">{item.message}</p>
+                      )}
                     </div>
                   </div>
                 ))}

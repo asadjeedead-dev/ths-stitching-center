@@ -172,6 +172,24 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md', l
     );
   }
 
+  if (status === 'Contacted') {
+    return (
+      <span className={`inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        Contacted
+      </span>
+    );
+  }
+
+  if (status === 'Closed') {
+    return (
+      <span className={`inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 ${sizeClasses}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+        Closed
+      </span>
+    );
+  }
+
   // Generic fallback
   return (
     <span className={`inline-flex items-center rounded-full bg-slate-100 text-slate-700 ${sizeClasses}`}>

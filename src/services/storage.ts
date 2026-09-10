@@ -16,6 +16,8 @@ import {
   PublicApplication,
   ApplicationStatus,
   ActivityEvent,
+  ContactInquiry,
+  InquiryStatus,
 } from '../types';
 import { ASSETS } from '../data/initialData';
 import { COLLECTIONS, db } from './firebase';
@@ -134,6 +136,17 @@ export function subscribeApplications(onData: (rows: PublicApplication[]) => voi
         rows
           .map((app) => ({ ...app, status: migrateApplicationStatus(app.status) }))
           .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
+      ),
+    onError
+  );
+}
+
+export function subscribeInquiries(onData: (rows: ContactInquiry[]) => void, onError?: (error: Error) => void): Unsubscribe {
+  return subscribeCollection<ContactInquiry>(
+    COLLECTIONS.INQUIRIES,
+    (rows) =>
+      onData(
+        [...rows].sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
       ),
     onError
   );
@@ -528,12 +541,49 @@ export async function deleteApplication(id: string): Promise<void> {
   }
 }
 
+export async function submitInquiry(
+  inquiry: Omit<ContactInquiry, 'id' | 'submittedAt' | 'status'>
+): Promise<ContactInquiry> {
+  const newInquiry: ContactInquiry = {
+    ...inquiry,
+    id: `inq_${Date.now()}`,
+    submittedAt: new Date().toISOString(),
+    status: 'New',
+  };
+  await setDoc(doc(db, COLLECTIONS.INQUIRIES, newInquiry.id), clean(newInquiry));
+  try {
+    await logActivity('inquiry', `New contact message from ${newInquiry.name}`);
+  } catch {
+    // Inquiry is already saved; activity is optional and must not fail the form.
+  }
+  return newInquiry;
+}
+
+export async function updateInquiryStatus(id: string, status: InquiryStatus): Promise<void> {
+  const snapshot = await getDoc(doc(db, COLLECTIONS.INQUIRIES, id));
+  if (!snapshot.exists()) return;
+  const current = snapshot.data() as ContactInquiry;
+  const target: ContactInquiry = { ...current, id, status };
+  await setDoc(doc(db, COLLECTIONS.INQUIRIES, id), clean(target));
+  await logActivity('inquiry', `Inquiry from ${target.name} marked ${status}`);
+}
+
+export async function deleteInquiry(id: string): Promise<void> {
+  const snapshot = await getDoc(doc(db, COLLECTIONS.INQUIRIES, id));
+  await deleteDoc(doc(db, COLLECTIONS.INQUIRIES, id));
+  if (snapshot.exists()) {
+    const removed = snapshot.data() as ContactInquiry;
+    await logActivity('inquiry', `Inquiry deleted: ${removed.name}`);
+  }
+}
+
 export async function clearAllData(): Promise<void> {
   const names = [
     COLLECTIONS.STUDENTS,
     COLLECTIONS.ORDERS,
     COLLECTIONS.ATTENDANCE,
     COLLECTIONS.APPLICATIONS,
+    COLLECTIONS.INQUIRIES,
     COLLECTIONS.ACTIVITY,
   ];
   for (const name of names) {
