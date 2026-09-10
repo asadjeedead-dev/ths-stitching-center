@@ -1,0 +1,6 @@
+{
+  "name": "THS Stitching Center",
+  "description": "Comprehensive public website and management system for the Taleem-o-Hunar Society (THS) Stitching Center, empowering women through vocational training, student progress tracking, attendance, and stitching order management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
