@@ -128,12 +128,32 @@ export function subscribeAttendance(onData: (rows: AttendanceRecord[]) => void, 
   return subscribeCollection<AttendanceRecord>(COLLECTIONS.ATTENDANCE, onData, onError);
 }
 
+function isContactInquiryRecord(row: { id?: string; recordType?: string }): boolean {
+  return row.recordType === 'contact_inquiry' || (typeof row.id === 'string' && row.id.startsWith('inq_'));
+}
+
+function toContactInquiry(row: ContactInquiry & { fullName?: string; address?: string }): ContactInquiry {
+  const status: InquiryStatus =
+    row.status === 'Contacted' || row.status === 'Closed' ? row.status : 'New';
+  return {
+    id: row.id,
+    name: (row.name || row.fullName || '').trim(),
+    phone: row.phone || '',
+    area: (row.area || row.address || '').trim(),
+    message: row.message || '',
+    submittedAt: row.submittedAt || '',
+    status,
+    recordType: 'contact_inquiry',
+  };
+}
+
 export function subscribeApplications(onData: (rows: PublicApplication[]) => void, onError?: (error: Error) => void): Unsubscribe {
-  return subscribeCollection<PublicApplication>(
+  return subscribeCollection<PublicApplication & { recordType?: string }>(
     COLLECTIONS.APPLICATIONS,
     (rows) =>
       onData(
         rows
+          .filter((app) => !isContactInquiryRecord(app))
           .map((app) => ({ ...app, status: migrateApplicationStatus(app.status) }))
           .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
       ),
@@ -142,11 +162,14 @@ export function subscribeApplications(onData: (rows: PublicApplication[]) => voi
 }
 
 export function subscribeInquiries(onData: (rows: ContactInquiry[]) => void, onError?: (error: Error) => void): Unsubscribe {
-  return subscribeCollection<ContactInquiry>(
-    COLLECTIONS.INQUIRIES,
+  return subscribeCollection<ContactInquiry & { fullName?: string; address?: string }>(
+    COLLECTIONS.APPLICATIONS,
     (rows) =>
       onData(
-        [...rows].sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
+        rows
+          .filter((row) => isContactInquiryRecord(row))
+          .map(toContactInquiry)
+          .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
       ),
     onError
   );
@@ -181,8 +204,9 @@ export async function getAttendance(): Promise<AttendanceRecord[]> {
 export const getAttendanceRecords = getAttendance;
 
 export async function getApplications(): Promise<PublicApplication[]> {
-  const apps = await collectionDocs<PublicApplication>(COLLECTIONS.APPLICATIONS);
+  const apps = await collectionDocs<PublicApplication & { recordType?: string }>(COLLECTIONS.APPLICATIONS);
   return apps
+    .filter((app) => !isContactInquiryRecord(app))
     .map((app) => ({ ...app, status: migrateApplicationStatus(app.status) }))
     .sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''));
 }
@@ -542,15 +566,18 @@ export async function deleteApplication(id: string): Promise<void> {
 }
 
 export async function submitInquiry(
-  inquiry: Omit<ContactInquiry, 'id' | 'submittedAt' | 'status'>
+  inquiry: Omit<ContactInquiry, 'id' | 'submittedAt' | 'status' | 'recordType'>
 ): Promise<ContactInquiry> {
   const newInquiry: ContactInquiry = {
     ...inquiry,
     id: `inq_${Date.now()}`,
     submittedAt: new Date().toISOString(),
     status: 'New',
+    recordType: 'contact_inquiry',
   };
-  await setDoc(doc(db, COLLECTIONS.INQUIRIES, newInquiry.id), clean(newInquiry));
+  // Use the already-published `applications` collection so public visitors can save
+  // without a separate Firestore rules publish for `inquiries`.
+  await setDoc(doc(db, COLLECTIONS.APPLICATIONS, newInquiry.id), clean(newInquiry));
   try {
     await logActivity('inquiry', `New contact message from ${newInquiry.name}`);
   } catch {
@@ -560,19 +587,19 @@ export async function submitInquiry(
 }
 
 export async function updateInquiryStatus(id: string, status: InquiryStatus): Promise<void> {
-  const snapshot = await getDoc(doc(db, COLLECTIONS.INQUIRIES, id));
+  const snapshot = await getDoc(doc(db, COLLECTIONS.APPLICATIONS, id));
   if (!snapshot.exists()) return;
-  const current = snapshot.data() as ContactInquiry;
-  const target: ContactInquiry = { ...current, id, status };
-  await setDoc(doc(db, COLLECTIONS.INQUIRIES, id), clean(target));
+  const current = toContactInquiry({ ...(snapshot.data() as ContactInquiry), id });
+  const target: ContactInquiry = { ...current, status, recordType: 'contact_inquiry' };
+  await setDoc(doc(db, COLLECTIONS.APPLICATIONS, id), clean(target));
   await logActivity('inquiry', `Inquiry from ${target.name} marked ${status}`);
 }
 
 export async function deleteInquiry(id: string): Promise<void> {
-  const snapshot = await getDoc(doc(db, COLLECTIONS.INQUIRIES, id));
-  await deleteDoc(doc(db, COLLECTIONS.INQUIRIES, id));
+  const snapshot = await getDoc(doc(db, COLLECTIONS.APPLICATIONS, id));
+  await deleteDoc(doc(db, COLLECTIONS.APPLICATIONS, id));
   if (snapshot.exists()) {
-    const removed = snapshot.data() as ContactInquiry;
+    const removed = toContactInquiry({ ...(snapshot.data() as ContactInquiry), id });
     await logActivity('inquiry', `Inquiry deleted: ${removed.name}`);
   }
 }
@@ -583,7 +610,6 @@ export async function clearAllData(): Promise<void> {
     COLLECTIONS.ORDERS,
     COLLECTIONS.ATTENDANCE,
     COLLECTIONS.APPLICATIONS,
-    COLLECTIONS.INQUIRIES,
     COLLECTIONS.ACTIVITY,
   ];
   for (const name of names) {

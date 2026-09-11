@@ -143,6 +143,7 @@ export interface ContactInquiry {
   message: string;
   submittedAt: string;
   status: InquiryStatus;
+  recordType?: 'contact_inquiry';
 }
 
 export interface ActivityEvent {
