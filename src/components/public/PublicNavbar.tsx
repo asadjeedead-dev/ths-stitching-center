@@ -70,12 +70,11 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             onClick={() => handleNavClick('home')}
             className="flex items-center gap-3 min-w-0"
           >
-            <div className="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center p-1.5 overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-white overflow-hidden shrink-0">
               <img
                 src={ASSETS.logo}
-                alt="THS Stitching Center Logo"
+                alt="Taleem-o-Hunar Society logo"
                 className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
               />
             </div>
             <div className="text-left">

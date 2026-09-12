@@ -1,7 +1,7 @@
 import { Student, StitchingOrder, AttendanceRecord, PublicApplication, AdminUser } from '../types';
 
 export const ASSETS = {
-  logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLTszoUgZJOkONUAN4DkubgTTX4ZsGWjC2o4vGJgSNCr56nAYvr7S72M21HfxXeAwpkQNsTzXqkAU665nPvw85F_hNSj1XZ0QKHUsmwKD5MbhnjUea_0_h8T4frBEK1xWzw93gN3rIxgNvqr703j5qkwnT8UDix9Kp8u_LFg_v22VFSX4a8q--Ok80egIcXUSSRKvK7BHO979ItHFF3IFZXMgpvkIj5R2rHcVUULlRR565RowYoMue8Q',
+  logo: '/images/ths-logo.png',
   adminAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD-OaW0j-LsHsOHMdWQ9IZRRv1w90MdaCqRkfg32lfgbHsuOT-M4hmQ3RrfRibiHDBhCXBVJ1cKHM8k2zQ-lN__MCQ6Kk4krd31Dbx1yWBVcpAKQr7jcMuKKX3E1-9-SU2gJ7rha4i4f_9dIdBi2C7KnzhGfNcxubb6XAuCbshZ9zZR8DAB4L93dOzjVcBkftSq6cdUZ-3YGwFTO_S1EX48eMb_YFRixxLXDMCsFS9YuSIx1-mIK3dCqQ',
   heritageBuilding: '/images/center-building.jpg?v=2',
   artisanHands: '/images/student-frock.jpg?v=2',

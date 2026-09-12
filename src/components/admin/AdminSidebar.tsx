@@ -83,12 +83,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white p-1 overflow-hidden shrink-0 shadow-xs">
+          <div className="w-10 h-10 rounded-full bg-white overflow-hidden shrink-0 shadow-xs">
             <img
               src={ASSETS.logo}
-              alt="THS Logo"
+              alt="Taleem-o-Hunar Society logo"
               className="w-full h-full object-contain"
-              referrerPolicy="no-referrer"
             />
           </div>
           <div>

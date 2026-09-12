@@ -28,12 +28,11 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           {/* Col 1 & 2: Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white p-1 overflow-hidden shrink-0">
+              <div className="w-12 h-12 rounded-full bg-white overflow-hidden shrink-0">
                 <img
                   src={ASSETS.logo}
-                  alt="THS Logo"
+                  alt="Taleem-o-Hunar Society logo"
                   className="w-full h-full object-contain"
-                  referrerPolicy="no-referrer"
                 />
               </div>
               <div>

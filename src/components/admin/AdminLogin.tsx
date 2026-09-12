@@ -65,12 +65,11 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBackTo
         <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-slate-100 space-y-6">
           {/* Header */}
           <div className="text-center space-y-3">
-            <div className="w-16 h-16 rounded-2xl bg-[#eff4ff] border border-emerald-100 flex items-center justify-center mx-auto p-2 shadow-xs">
+            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto overflow-hidden shadow-xs">
               <img
                 src={ASSETS.logo}
-                alt="THS Logo"
+                alt="Taleem-o-Hunar Society logo"
                 className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
               />
             </div>
             <div>
